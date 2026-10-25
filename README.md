@@ -1,57 +1,42 @@
-# Hướng 2 — Knowledge Graph + LLM Recommendation
+# Hướng 2 — Knowledge Graph Recommendation
 
 **Người thực hiện:** Lê Trần Nhật Huy (Member 2)  
 **Thời điểm tổng hợp:** 24/10/2026  
 
-**Mục tiêu:** Kế thừa baseline và danh sách ứng viên từ Member 1, tích hợp tri thức từ Knowledge Graph (KG) và thông tin ngữ nghĩa từ Large Language Model (LLM) nhằm cải thiện khả năng biểu diễn quan hệ sản phẩm và chất lượng xếp hạng gợi ý.
+## Mục tiêu
+Kế thừa tập ứng viên baseline từ Member 1 (Cường Quốc), xây dựng và khai thác Đồ thị tri thức (Knowledge Graph - KG) để mở rộng mối quan hệ thực thể (User, Product, Brand, Category), cải thiện độ chính xác của hệ thống gợi ý và bàn giao dữ liệu đã xử lý cho Member 3 (Giảng Nguyên) tiếp tục tích hợp LLM và Reranking.
 
 ---
 
-## 1. Đặt vấn đề (Problem Statement)
-- Các phương pháp Lọc cộng tác (Collaborative Filtering - CF) truyền thống chỉ dựa vào lịch sử tương tác giữa Người dùng - Sản phẩm.
-- **Hạn chế:** Bỏ qua các thông tin mô tả phong phú từ metadata của sản phẩm (thương hiệu, danh mục, thuộc tính) và dễ gặp phải sự cố "Khởi động lạnh" (Cold-start) khi dữ liệu tương tác còn ít.
+## Cấu trúc thư mục mã nguồn
+* `All_Beauty_Cleaned_Merged_GitHub.xlsx`: Dataset đã được làm sạch và chuẩn hóa.
+* `kg_triples_csv.ipynb`: Notebook xử lý trích xuất bộ ba tri thức (Triples).
+* `Direction2_KnowledgeGraph.ipynb`: Notebook chính thực thi xây dựng đồ thị NetworkX, đánh giá đối chứng và xuất file bàn giao.
+* `requirements.txt`: Các thư viện Python cần thiết (`pandas`, `numpy`, `networkx`, `matplotlib`, `openpyxl`).
 
 ---
 
-## 2. Quá trình thực hiện & Phương pháp triển khai
-1. **Thu thập & Tiền xử lý dữ liệu:** Xử lý tập dữ liệu Amazon (`All_Beauty`) gồm metadata (`brand`, `category`) và lịch sử tương tác (`user_id`, `parent_asin`, `rating`, `timestamp`).
-2. **Xây dựng Knowledge Graph (KG):** Tạo các bộ ba tri thức (*Triples*) kết nối `(Product, HAS_BRAND, Brand)` và `(Product, BELONGS_TO, Category)` bằng `NetworkX`.
-3. **Tích hợp LLM (Review & Mô tả):** Sử dụng LLM để trích xuất embedding ngữ nghĩa từ các bài đánh giá (Reviews) và mô tả chi tiết sản phẩm.
-4. **Cơ chế Xếp hạng Gợi ý:** Tích hợp điểm tương đồng đồ thị KG và điểm ngữ nghĩa LLM vào danh sách sản phẩm ứng viên từ Baseline (Member 1).
+## Kết quả đánh giá đối chứng (Baseline vs. Baseline + KG)
+
+Thực nghiệm so sánh hiệu năng giữa thuật toán Lọc cộng tác cơ sở của Cường Quốc và mô hình cải tiến tích hợp Đồ thị tri thức:
+
+| Metric | Baseline (ItemCF - Member 1) | Baseline + KG (Member 2) |
+| :--- | :---: | :---: |
+| **Precision@5** | 0.0420 | **0.0680** |
+| **Recall@5** | 0.0650 | **0.1120** |
+| **NDCG@5** | 0.0510 | **0.0890** |
+| **Precision@10** | 0.0310 | **0.0510** |
+| **Recall@10** | 0.0980 | **0.1540** |
+| **NDCG@10** | 0.0620 | **0.1050** |
 
 ---
 
-## 3. Nội dung & Mã nguồn (Source Code)
-- `Direction2_KnowledgeGraph.ipynb`: Mã nguồn Python xử lý, vẽ đồ thị tri thức NetworkX, đánh giá 3 cấu hình và xuất file bàn giao.
-- `kg_triples_csv.ipynb`: Mã nguồn tự động trích xuất file bộ ba tri thức (`kg_triples.csv`).
-- `All_Beauty_Cleaned_Merged_GitHub.xlsx`: Tập dữ liệu chuẩn đã làm sạch dùng cho huấn luyện và liên kết đồ thị.
+## Biểu đồ trực quan hóa
+Biểu đồ so sánh chi tiết hiệu năng giữa hai cấu hình đã được lưu tại: `comparison_baseline_vs_kg.png`.
 
 ---
 
-## 4. Thực nghiệm & Đánh giá (So sánh 3 cấu hình)
-Thực nghiệm đo lường trên cùng giao thức đánh giá Top-K ($K \in \{5, 10\}$):
-
-| Chỉ số (Metric) | Baseline (Member 1) | Baseline + KG | Baseline + KG + LLM | Mức cải thiện (%) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Precision@5** | 0.0420 | 0.0680 | **0.0850** | **+102.38%** |
-| **Recall@5** | 0.0650 | 0.1120 | **0.1450** | **+123.08%** |
-| **NDCG@5** | 0.0510 | 0.0890 | **0.1180** | **+131.37%** |
-| **Precision@10** | 0.0310 | 0.0510 | **0.0640** | **+106.45%** |
-| **Recall@10** | 0.0980 | 0.1540 | **0.1920** | **+95.92%** |
-| **NDCG@10** | 0.0620 | 0.1050 | **0.1380** | **+122.58%** |
-
-### Biểu đồ So sánh 3 Cấu hình:
-![So sánh Baseline vs KG vs LLM](comparison_baseline_vs_kg.png)
-
----
-
-## 5. Đầu ra & Điều kiện bàn giao cho Member 3
-- **KG & Triples Data:** Tập bộ ba tri thức (`kg_triples.csv`) và file metadata làm sạch (`All_Beauty_Cleaned_Merged_GitHub.xlsx`).
-- **Source Code:** Notebook `Direction2_KnowledgeGraph.ipynb` thực hiện dựng KG, trích xuất ngữ nghĩa LLM và tính chỉ số Top-K.
-- **Danh sách bàn giao Member 3:** File kết quả xếp hạng (`kg_llm_recommendations_for_member3.csv`) chứa danh sách gợi ý, điểm số (`score`), và schema định dạng chuẩn để Member 3 tái sử dụng đánh giá *Popularity Bias* và thử nghiệm *Reranking*.
-
----
-
-## 6. Khoảng trống nghiên cứu & Định hướng phát triển (Chuyển sang Hướng 3)
-- **Khoảng trống của Hướng 2:** Đồ thị tri thức tĩnh chưa phản ánh được sự thay đổi theo thời gian của hành vi người dùng và chưa tối ưu hoàn toàn ngữ nghĩa văn bản phức tạp.
-- **Định hướng phát triển:** Nâng cấp lên **Hướng 3: Đồ thị tri thức theo thời gian (Temporal Knowledge Graph - TKG) kết hợp LLM** để bổ sung nhãn thời gian (*Timestamp*) giúp hệ thống gợi ý thích ứng tốt hơn theo từng giai đoạn.
+## Bàn giao cho Member 3 (Giảng Nguyên)
+Đầu ra phục vụ cho quá trình tích hợp LLM và xử lý thiên lệch (Reranking):
+* **File dữ liệu bàn giao:** `kg_recommendations_for_member3.csv`
+* **Các trường thông tin chính:** `user_id`, `recommended_items`, `score_kg`, `schema_metadata`.
