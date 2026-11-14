@@ -1,0 +1,5 @@
+user_id,recommended_items,score_kg,schema_metadata
+User_1001,Product_B00005NDAB,0.92,"Brand:Maybelline,Cat:Makeup"
+User_1001,Product_B00005NDAD,0.85,"Brand:Maybelline,Cat:Skincare"
+User_1002,Product_B00005NDAC,0.89,"Brand:L'Oreal,Cat:Face"
+User_1002,Product_B00005NDAB,0.75,"Brand:Maybelline,Cat:Makeup"
